@@ -112,12 +112,15 @@ public class LoadSaveMain : MonoBehaviour
    
     public void LoadTest8k()
     {
-        if(filesToLoad.Count > 0 && !string.IsNullOrEmpty(filesToLoad[0]))
+        float startTime = Time.realtimeSinceStartup;
+        if (filesToLoad.Count > 0 && !string.IsNullOrEmpty(filesToLoad[0]))
         {
             pixelBuffer.SetData(FreeImageManager.Instance.LoadImageBytes(filesToLoad[0], true));
             //shader.SetVector("MousePos", MousePos);
             ComputeStepFrame();
         }
+        float elapsedTime = Time.realtimeSinceStartup - startTime;
+        Debug.Log("<color=green>TimeToLoadUsingNormalLoading=" + elapsedTime);
     }
 
     void ComputeStepFrame()
@@ -185,6 +188,7 @@ public class LoadSaveMain : MonoBehaviour
 
     public void LoadMultipleImagesFromDiskOneAtATime()
     {
+        float startTime = Time.realtimeSinceStartup;
         if (filesToLoad.Count > 0 && filesToLoad.Count >= mapToLoadIndex && !string.IsNullOrEmpty(filesToLoad[mapToLoadIndex]))
         {
             if (loadedMaps.Count >= mapToLoadIndex)
@@ -212,6 +216,8 @@ public class LoadSaveMain : MonoBehaviour
                 mapToLoadIndex = 0;
             }
         }
+        float elapsedTime = Time.realtimeSinceStartup - startTime;
+        Debug.Log("<color=green>TimeToLoadUsingNormalLoading=" + elapsedTime);
     }
 
     public void LoadMultipleImagesFromDisk()
