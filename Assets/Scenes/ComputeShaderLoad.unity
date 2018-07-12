@@ -263,7 +263,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1575700948}
+      - m_Target: {fileID: 1575700946}
         m_MethodName: CollectGarbage
         m_Mode: 1
         m_Arguments:
@@ -636,14 +636,28 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1575700947}
-  - component: {fileID: 1575700948}
+  - component: {fileID: 1575700946}
   m_Layer: 0
-  m_Name: NormalLoad
+  m_Name: OptimizedLoad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1575700946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1575700945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7394c756d28b6824ea3dae7cb6605aa0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  quadPrefab: {fileID: 1554809392765422, guid: dac953fff9150d540aa9c960967a6cda, type: 2}
+  memoryInfoText: {fileID: 550903818}
+  shader: {fileID: 7200000, guid: 31a67f7d48b6ad340b1af79d4fa0751b, type: 3}
 --- !u!4 &1575700947
 Transform:
   m_ObjectHideFlags: 0
@@ -657,19 +671,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1575700948
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1575700945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f4b5f761a2ea46449fba8abd5a2324f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  quadPrefab: {fileID: 1554809392765422, guid: dac953fff9150d540aa9c960967a6cda, type: 2}
-  memoryInfoText: {fileID: 550903818}
 --- !u!1 &1649019753
 GameObject:
   m_ObjectHideFlags: 0
@@ -746,7 +747,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1575700948}
+      - m_Target: {fileID: 1575700946}
         m_MethodName: LoadImage
         m_Mode: 1
         m_Arguments:
@@ -995,7 +996,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Load Normal
+  m_Text: Load Optimized
 --- !u!222 &1782478324
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1078,7 +1079,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1575700948}
+      - m_Target: {fileID: 1575700946}
         m_MethodName: UnloadAllMaps
         m_Mode: 1
         m_Arguments:

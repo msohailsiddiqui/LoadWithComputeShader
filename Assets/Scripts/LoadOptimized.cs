@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Profiling;
 
-public class LoadNormal : MonoBehaviour
+public class LoadOptimized : MonoBehaviour
 {
     public GameObject quadPrefab;
     public Text memoryInfoText;
@@ -22,7 +22,7 @@ public class LoadNormal : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        FreeImageManagerOrig.Instance.Test();
+        FreeImageManager.Instance.Test();
 
         quadObjs = new List<GameObject>();
         quadMaterials = new List<Material>();
@@ -94,7 +94,7 @@ public class LoadNormal : MonoBehaviour
     {
         loadStartTime = Time.realtimeSinceStartup;
         // First try to load the image
-        RenderTexture rtHandle = FreeImageManagerOrig.Instance.LoadImage(filePath, isLinear: false);
+        RenderTexture rtHandle = FreeImageManager.Instance.LoadImage(filePath, isLinear: false);
         if (rtHandle != null)
         {
             //First Create a new quad to show the Image

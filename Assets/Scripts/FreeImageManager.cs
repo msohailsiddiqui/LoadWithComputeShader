@@ -124,6 +124,8 @@ public class FreeImageManager : Singleton<FreeImageManager>
 
         FreeImage.ConvertToRawBits(bytes, dib, pitch, bpp, 0, 0, 0, false);
 
+        FreeImage.UnloadEx(ref dib);
+
         return bytes;
     }
 

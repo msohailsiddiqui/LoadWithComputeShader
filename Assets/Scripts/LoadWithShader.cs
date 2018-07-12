@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Profiling;
 
-public class LoadNormal : MonoBehaviour
+public class LoadWithShader : MonoBehaviour
 {
     public GameObject quadPrefab;
     public Text memoryInfoText;
@@ -19,15 +19,40 @@ public class LoadNormal : MonoBehaviour
     private float loadStartTime;
     private float totalLoadTime;
 
+    public ComputeShader shader;
+    private int texResolution = 8192;
+    private int kernelHandle;
+    RenderTexture rtHandle;
+
+    struct pixel
+    {
+        public float r;
+        public float g;
+        public float b;
+    }
+
+    ComputeBuffer pixelBuffer;
+
+
     // Use this for initialization
     void Start()
     {
-        FreeImageManagerOrig.Instance.Test();
+        FreeImageManager.Instance.Test();
 
         quadObjs = new List<GameObject>();
         quadMaterials = new List<Material>();
         loadedMaps = new List<RenderTexture>();
+
+        //Compute Shader Stuff
+        kernelHandle = shader.FindKernel("CSMain");
+
+        pixelBuffer = new ComputeBuffer(texResolution * texResolution, sizeof(float) * 3, ComputeBufferType.Default);
+        
+
+        ///////////////////////////////////////////////
+
         UpdateMemoryInfo();
+
     }
     void UpdateMemoryInfo()
     {
@@ -52,6 +77,7 @@ public class LoadNormal : MonoBehaviour
     private void OnDestroy()
     {
         UnloadAllMaps();
+        pixelBuffer.Release();
     }
 
     public void LoadImage()
@@ -86,7 +112,7 @@ public class LoadNormal : MonoBehaviour
             quadObjs.Clear();
             numLoadedMaps = 0;
         }
-
+        
         UpdateMemoryInfo();
     }
 
@@ -94,7 +120,17 @@ public class LoadNormal : MonoBehaviour
     {
         loadStartTime = Time.realtimeSinceStartup;
         // First try to load the image
-        RenderTexture rtHandle = FreeImageManagerOrig.Instance.LoadImage(filePath, isLinear: false);
+        rtHandle = new RenderTexture(texResolution, texResolution, 0, RenderTextureFormat.ARGBFloat);
+        rtHandle.enableRandomWrite = true;
+        rtHandle.Create();
+
+        pixelBuffer.SetData(FreeImageManager.Instance.LoadImageBytes(filePath));
+        //shader.SetVector("MousePos", MousePos);
+        shader.SetTexture(kernelHandle, "Result", rtHandle);
+        shader.SetBuffer(kernelHandle, "PixelBuffer", pixelBuffer);
+        shader.Dispatch(kernelHandle, texResolution / 8, texResolution / 8, 1);
+
+
         if (rtHandle != null)
         {
             //First Create a new quad to show the Image
@@ -143,5 +179,6 @@ public class LoadNormal : MonoBehaviour
     private void OnApplicationQuit()
     {
         UnloadAllMaps();
+        pixelBuffer.Release();
     }
 }
