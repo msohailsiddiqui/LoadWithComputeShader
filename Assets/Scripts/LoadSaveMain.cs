@@ -23,9 +23,34 @@ public class LoadSaveMain : MonoBehaviour
 
     private int mapToLoadIndex;
 
+    public ComputeShader shader;
+    private int texResolution = 8192;
+    private int kernelHandle;
+    RenderTexture rtToShow;
+
+    struct pixel
+    {
+        public float r;
+        public float g;
+        public float b;
+    }
+
+    ComputeBuffer pixelBuffer;
+
+
     // Use this for initialization
     void Start()
     {
+        //Compute Shader Stuff
+        rtToShow = new RenderTexture(texResolution, texResolution, 0, RenderTextureFormat.ARGBFloat);
+        rtToShow.enableRandomWrite = true;
+        rtToShow.Create();
+        kernelHandle = shader.FindKernel("CSMain");
+
+        pixelBuffer = new ComputeBuffer(8192*8192, sizeof(float) * 3, ComputeBufferType.Default);
+
+        ///////////////////////////////////////////////
+
         FreeImageManager.Instance.Test();
 
         quadObjs = new List<GameObject>();
@@ -85,6 +110,31 @@ public class LoadSaveMain : MonoBehaviour
         loadedMap.Create();
     }
    
+    public void LoadTest8k()
+    {
+        if(filesToLoad.Count > 0 && !string.IsNullOrEmpty(filesToLoad[0]))
+        {
+            pixelBuffer.SetData(FreeImageManager.Instance.LoadImageBytes(filesToLoad[0], true));
+            //shader.SetVector("MousePos", MousePos);
+            ComputeStepFrame();
+        }
+    }
+
+    void ComputeStepFrame()
+    {
+
+        shader.SetTexture(kernelHandle, "Result", rtToShow);
+        shader.SetBuffer(kernelHandle, "PixelBuffer", pixelBuffer);
+        shader.Dispatch(kernelHandle, texResolution / 8, texResolution / 8, 1);
+        quadMaterials[0].mainTexture = rtToShow;
+    }
+
+    private void OnDestroy()
+    {
+        rtToShow.Release();
+        pixelBuffer.Release();
+    }
+
     public void LoadImage()
     {
         BrowseWrapper.Instance.Browse(callbackFunction: LoadImageFromDisk,

@@ -45,6 +45,88 @@ public class FreeImageManager : Singleton<FreeImageManager>
     public Material AToRMaterial;
     public Material PremultiplyMaterial;
     //public Texture2D tex;
+
+    public byte[] LoadImageBytes(string path, bool isLinear = false, bool isGrayscale = false, bool doMipMaps = false, bool forceGC = false, bool premultiplyAlpha = false)
+    {
+        // default bits per channel
+        //uint origBPP = outBPP = 0;
+        bool successfullyLoadedRaw = false;
+        int width = 0, height = 0;
+        TextureFormat formatToLoad = TextureFormat.ARGB32;
+        RenderTextureFormat rtFormat = RenderTextureFormat.ARGB32;
+        bool forceGrayscaleAfterTexture2D = false;
+
+        var loadType = System.IO.Path.GetExtension(path);
+        FREE_IMAGE_LOAD_FLAGS loadFlags = FREE_IMAGE_LOAD_FLAGS.DEFAULT;
+        switch (loadType)
+        {
+            case ".png":
+                loadFlags = FREE_IMAGE_LOAD_FLAGS.PNG_IGNOREGAMMA;
+                break;
+
+            case ".jpg":
+            case ".jpeg":
+                loadFlags = FREE_IMAGE_LOAD_FLAGS.JPEG_ACCURATE;
+                break;
+        }
+        // Format is stored in 'format' on successfull load.
+        FREE_IMAGE_FORMAT format = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
+        FIBITMAP dib;
+        bool isModifiedEXR = false;
+        char yChar = 'Y';
+        byte yByte = Convert.ToByte(yChar);
+        char rChar = 'R';
+        byte rByte = Convert.ToByte(rChar);
+        //byte[] byteArray = File.ReadAllBytes(path);
+        FileStream stream = null;
+        if (Path.GetExtension(path).ToLower() == ".exr")
+        {
+            stream = new FileStream(path, FileMode.Open);
+
+            stream.Position = 66;
+            isModifiedEXR = (stream.ReadByte() == rByte);
+            if (isModifiedEXR)
+            {
+                Debug.Log("<color=blue>*** This is a modified EXR </color>");
+                //byteArray[66] = yByte;
+                stream.Position = 66;
+                stream.WriteByte(yByte);
+                stream.Position = 0;
+            }
+        }
+
+#if UNITY_STANDALONE_OSX
+		if (stream == null)
+			stream = new FileStream(path, FileMode.Open);
+
+		dib = FreeImage.LoadFromStream(stream, loadFlags, ref format);
+#else
+        dib = FreeImage.LoadEx(path, loadFlags, ref format);
+        Debug.Log("Used Heap Size After FreeImage.LoadEx: " + Profiler.GetMonoUsedSizeLong() / 1024 / 1024);
+        
+#endif
+        if (stream != null)
+        {
+            stream.Dispose();
+            GC.Collect();
+            Debug.Log("Used Heap Size After stream.Dispose: " + Profiler.GetMonoUsedSizeLong() / 1024 / 1024);
+        }
+        width = (int)FreeImageAPI.FreeImage.GetWidth(dib);
+        height = (int)FreeImageAPI.FreeImage.GetHeight(dib);
+        uint bpp = FreeImage.GetBPP(dib);
+        int pitch = (int)FreeImage.GetPitch(dib);
+        long byteSize = pitch * height;
+        Debug.Log("width: "+ width+ ", height: "+height+ ", bpp: "+bpp+", pitch: "+pitch + "byteSize: " + byteSize);
+
+        if (doMipMaps)
+            byteSize = (long)(byteSize * 1.6666f);
+
+
+        FreeImage.ConvertToRawBits(bytes, dib, pitch, bpp, 0, 0, 0, false);
+
+        return bytes;
+    }
+
     public RenderTexture LoadImage(string path, bool isLinear = false, bool isGrayscale = false, bool doMipMaps = false, bool forceGC=false, bool premultiplyAlpha = false)
     {
         // default bits per channel
